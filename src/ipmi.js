@@ -87,8 +87,10 @@ class IpmiClient {
     }
 
     const name = pieces[0];
-    const reading = pieces[1];
-    const tempC = this.parseTempCFromReading(reading);
+    const readingCandidates = pieces.slice(1);
+    const tempC = readingCandidates
+      .map((candidate) => this.parseTempCFromReading(candidate))
+      .find((value) => value !== null);
     if (tempC === null) {
       return null;
     }
