@@ -1,0 +1,20 @@
+[Unit]
+Description=ITM IPMI Fan Control Daemon
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/itm
+EnvironmentFile=-/opt/itm/.env
+ExecStart=/usr/bin/env node /opt/itm/src/index.js
+Restart=always
+RestartSec=5
+User=root
+Group=root
+KillSignal=SIGTERM
+TimeoutStopSec=20
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

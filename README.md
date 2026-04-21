@@ -56,6 +56,89 @@ Then start from any path on the server with:
 itm
 ```
 
+## Run as a `systemd` service
+
+This repository includes a unit template at `deploy/systemd/itm.service`.
+
+### Quick install (recommended)
+
+From the project root:
+
+```bash
+sudo ./bin/install-systemd.sh
+```
+
+Optional flags:
+
+```bash
+sudo ./bin/install-systemd.sh --install-dir /srv/itm --service-name itm
+```
+
+This script will:
+
+- copy/update the app files to the install directory
+- create `.env` from `.env.example` if missing
+- run `npm install --omit=dev`
+- install/update `/etc/systemd/system/<service>.service`
+- run `systemctl daemon-reload`
+- run `systemctl enable --now <service>.service`
+
+### Uninstall helper
+
+Disable/remove the service unit:
+
+```bash
+sudo ./bin/uninstall-systemd.sh
+```
+
+Also remove the installed app directory:
+
+```bash
+sudo ./bin/uninstall-systemd.sh --remove-app-dir
+```
+
+Custom service and install path:
+
+```bash
+sudo ./bin/uninstall-systemd.sh --service-name itm --install-dir /srv/itm --remove-app-dir
+```
+
+### Manual install
+
+1. Place the project in `/opt/itm` (or edit paths in the unit file):
+
+   ```bash
+   sudo mkdir -p /opt
+   sudo cp -R "$PWD" /opt/itm
+   cd /opt/itm
+   npm install --omit=dev
+   cp .env.example .env
+   ```
+
+2. Install and enable the service:
+
+   ```bash
+   sudo cp deploy/systemd/itm.service /etc/systemd/system/itm.service
+   sudo systemctl daemon-reload
+   sudo systemctl enable --now itm.service
+   ```
+
+3. Common operations:
+
+   ```bash
+   sudo systemctl status itm.service
+   sudo systemctl restart itm.service
+   sudo systemctl stop itm.service
+   sudo journalctl -u itm.service -f
+   ```
+
+If your project path is not `/opt/itm`, update both `WorkingDirectory`, `EnvironmentFile`, and `ExecStart` in `/etc/systemd/system/itm.service`, then run:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart itm.service
+```
+
 ## Configuration (`.env`)
 
 - `IPMI_INTERFACE` default `open` (do not use `lan`/`lanplus` in local-only mode)
@@ -103,9 +186,6 @@ IPMI_SENSOR_COMMAND=sdr type temperature
 
 ## Roadmap (Future Implementations)
 
-- Run as a persistent background service:
-   - Add a `systemd` unit and setup instructions so monitoring continues after SSH logout and on reboot.
-   - Include basic service operations (`start`, `stop`, `restart`, `status`, logs).
 - Separate how CPU and system temperatures affect fan speeds:
    - Add independent preset curves (for example, `CPU_FAN_PRESETS` and `SYSTEM_FAN_PRESETS`).
    - Keep CPU safety fallback thresholds while allowing system-specific ramp behavior.
