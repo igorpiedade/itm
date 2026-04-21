@@ -13,13 +13,13 @@ class FanController {
 
   getCpuTemps(sensors) {
     return sensors
-      .filter((sensor) => /cpu/i.test(sensor.name))
+      .filter((sensor) => this.config.cpuSensorRegex.test(sensor.name))
       .map((sensor) => sensor.tempC);
   }
 
   getSystemTemps(sensors) {
     return sensors
-      .filter((sensor) => /(system|sys|inlet|ambient)/i.test(sensor.name))
+      .filter((sensor) => this.config.systemSensorRegex.test(sensor.name))
       .map((sensor) => sensor.tempC);
   }
 

@@ -77,6 +77,16 @@ const splitCommand = (commandValue) => {
     .filter(Boolean);
 };
 
+const toRegExp = (value, fallbackPattern, keyName) => {
+  const pattern = value || fallbackPattern;
+
+  try {
+    return new RegExp(pattern, 'i');
+  } catch (error) {
+    throw new Error(`Invalid regex for ${keyName}: ${pattern}`);
+  }
+};
+
 const loadConfig = () => {
   const required = ['IPMI_HOST', 'IPMI_USER', 'IPMI_PASSWORD'];
   for (const key of required) {
@@ -101,7 +111,13 @@ const loadConfig = () => {
     maxCpuTempC: toNumber(process.env.MAX_CPU_TEMP_C, 85),
     recoveryCpuTempC: toNumber(process.env.RECOVERY_CPU_TEMP_C, 60),
     fanPresets: parsePresets(process.env.FAN_PRESETS),
-    restoreAutoOnExit: toBoolean(process.env.RESTORE_AUTO_ON_EXIT, true)
+    restoreAutoOnExit: toBoolean(process.env.RESTORE_AUTO_ON_EXIT, true),
+    cpuSensorRegex: toRegExp(process.env.CPU_SENSOR_REGEX, '(^temp$|cpu)', 'CPU_SENSOR_REGEX'),
+    systemSensorRegex: toRegExp(
+      process.env.SYSTEM_SENSOR_REGEX,
+      '(system|sys|inlet|ambient|exhaust)',
+      'SYSTEM_SENSOR_REGEX'
+    )
   };
 };
 

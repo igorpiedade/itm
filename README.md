@@ -45,8 +45,12 @@ npm start
 - `POLL_INTERVAL_MS` default `5000`
 - `MAX_CPU_TEMP_C` default `85`
 - `RECOVERY_CPU_TEMP_C` default `60`
+- `CPU_SENSOR_REGEX` default `(^temp$|cpu)`
+- `SYSTEM_SENSOR_REGEX` default `(system|sys|inlet|ambient|exhaust)`
 - `FAN_PRESETS` default `0:10,51:15,60:25,70:40,75:60,80:80,85:100`
 - `RESTORE_AUTO_ON_EXIT` default `true`
+
+For platforms where CPU sensors are exposed as plain `Temp`, keep the default `CPU_SENSOR_REGEX`.
 
 ### Preset table example
 
