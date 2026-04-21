@@ -23,6 +23,18 @@ const toBoolean = (value, fallback) => {
   return fallback;
 };
 
+const normalizeLocalInterface = (value) => {
+  const normalized = String(value || 'open').trim().toLowerCase();
+
+  if (['lan', 'lanplus'].includes(normalized)) {
+    throw new Error(
+      'Invalid IPMI_INTERFACE for local-only mode: use "open" (or remove IPMI_INTERFACE to use default "open").'
+    );
+  }
+
+  return normalized;
+};
+
 const parsePresets = (value) => {
   const fallback = [
     { threshold: 0, speed: 10 },
@@ -90,7 +102,7 @@ const toRegExp = (value, fallbackPattern, keyName) => {
 const loadConfig = () => {
   return {
     ipmi: {
-      interface: process.env.IPMI_INTERFACE || 'open',
+      interface: normalizeLocalInterface(process.env.IPMI_INTERFACE),
       setManualCommand: splitCommand(process.env.IPMI_SET_MANUAL_COMMAND) || ['raw', '0x30', '0x30', '0x01', '0x00'],
       setAutoCommand: splitCommand(process.env.IPMI_SET_AUTO_COMMAND) || ['raw', '0x30', '0x30', '0x01', '0x01'],
       setFanSpeedTemplate:

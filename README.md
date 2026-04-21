@@ -40,7 +40,7 @@ npm start
 
 ## Configuration (`.env`)
 
-- `IPMI_INTERFACE` default `open`
+- `IPMI_INTERFACE` default `open` (do not use `lan`/`lanplus` in local-only mode)
 - `POLL_INTERVAL_MS` default `5000`
 - `MAX_CPU_TEMP_C` default `85`
 - `RECOVERY_CPU_TEMP_C` default `60`
