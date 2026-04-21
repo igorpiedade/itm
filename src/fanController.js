@@ -129,7 +129,13 @@ class FanController {
       }
 
       if (referenceTemp === null) {
-        this.logger.warn('No temperature readings found; keeping current fan speed.');
+        const sensorMeta = this.ipmiClient.lastSensorReadMeta;
+        const details = sensorMeta
+          ? ` (raw lines: ${sensorMeta.lineCount}, parsed: ${sensorMeta.parsedCount}${
+              sensorMeta.sampleLine ? `, sample: "${sensorMeta.sampleLine}"` : ''
+            })`
+          : '';
+        this.logger.warn(`No temperature readings found; keeping current fan speed.${details}`);
         return;
       }
 

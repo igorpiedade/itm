@@ -88,19 +88,9 @@ const toRegExp = (value, fallbackPattern, keyName) => {
 };
 
 const loadConfig = () => {
-  const required = ['IPMI_HOST', 'IPMI_USER', 'IPMI_PASSWORD'];
-  for (const key of required) {
-    if (!process.env[key]) {
-      throw new Error(`Missing required environment variable: ${key}`);
-    }
-  }
-
   return {
     ipmi: {
-      host: process.env.IPMI_HOST,
-      user: process.env.IPMI_USER,
-      password: process.env.IPMI_PASSWORD,
-      interface: process.env.IPMI_INTERFACE || 'lanplus',
+      interface: process.env.IPMI_INTERFACE || 'open',
       setManualCommand: splitCommand(process.env.IPMI_SET_MANUAL_COMMAND) || ['raw', '0x30', '0x30', '0x01', '0x00'],
       setAutoCommand: splitCommand(process.env.IPMI_SET_AUTO_COMMAND) || ['raw', '0x30', '0x30', '0x01', '0x01'],
       setFanSpeedTemplate:

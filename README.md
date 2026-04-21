@@ -14,7 +14,7 @@ Node.js daemon that uses `ipmitool` to control server fan speed based on CPU/sys
 
 - Node.js 18+
 - `ipmitool` installed and available in `PATH`
-- IPMI access to your server BMC
+- Local IPMI device access on the server where this app runs
 
 ## Setup
 
@@ -30,7 +30,7 @@ Node.js daemon that uses `ipmitool` to control server fan speed based on CPU/sys
    cp .env.example .env
    ```
 
-3. Edit `.env` with your IPMI target and credentials.
+3. Edit `.env` if needed (defaults are local-only).
 
 ## Run
 
@@ -40,8 +40,7 @@ npm start
 
 ## Configuration (`.env`)
 
-- `IPMI_HOST`, `IPMI_USER`, `IPMI_PASSWORD` (required)
-- `IPMI_INTERFACE` default `lanplus`
+- `IPMI_INTERFACE` default `open`
 - `POLL_INTERVAL_MS` default `5000`
 - `MAX_CPU_TEMP_C` default `85`
 - `RECOVERY_CPU_TEMP_C` default `60`

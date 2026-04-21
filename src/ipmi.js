@@ -6,19 +6,11 @@ const execFileAsync = promisify(execFile);
 class IpmiClient {
   constructor(config) {
     this.config = config;
+    this.lastSensorReadMeta = null;
   }
 
   async runCommand(commandParts) {
-    const baseArgs = [
-      '-I',
-      this.config.interface,
-      '-H',
-      this.config.host,
-      '-U',
-      this.config.user,
-      '-P',
-      this.config.password
-    ];
+    const baseArgs = ['-I', this.config.interface];
 
     const args = [...baseArgs, ...commandParts];
 
@@ -49,6 +41,61 @@ class IpmiClient {
     await this.runCommand(command);
   }
 
+  parseTempCFromReading(reading) {
+    const normalized = String(reading || '').trim();
+    if (!normalized) {
+      return null;
+    }
+
+    if (/^na$/i.test(normalized)) {
+      return null;
+    }
+
+    const explicitTempMatch = normalized.match(/(-?\d+(?:\.\d+)?)\s*(?:degrees?\s*)?\s*\u00b0?\s*c\b/i);
+    if (explicitTempMatch) {
+      return Number(explicitTempMatch[1]);
+    }
+
+    const numericOnlyMatch = normalized.match(/(-?\d+(?:\.\d+)?)/);
+    if (numericOnlyMatch && /c\b/i.test(normalized)) {
+      return Number(numericOnlyMatch[1]);
+    }
+
+    return null;
+  }
+
+  parseSensorLine(line) {
+    const trimmedLine = String(line || '').trim();
+    if (!trimmedLine) {
+      return null;
+    }
+
+    let pieces = trimmedLine
+      .split('|')
+      .map((piece) => piece.trim())
+      .filter(Boolean);
+
+    if (pieces.length < 2) {
+      pieces = trimmedLine
+        .split(',')
+        .map((piece) => piece.trim())
+        .filter(Boolean);
+    }
+
+    if (pieces.length < 2) {
+      return null;
+    }
+
+    const name = pieces[0];
+    const reading = pieces[1];
+    const tempC = this.parseTempCFromReading(reading);
+    if (tempC === null) {
+      return null;
+    }
+
+    return { name, tempC };
+  }
+
   async readTemperatureSensors() {
     const output = await this.runCommand(this.config.sensorCommand);
 
@@ -57,26 +104,13 @@ class IpmiClient {
       .map((line) => line.trim())
       .filter(Boolean);
 
-    const sensors = [];
+    const sensors = lines.map((line) => this.parseSensorLine(line)).filter(Boolean);
 
-    for (const line of lines) {
-      const pieces = line.split('|').map((piece) => piece.trim());
-      if (pieces.length < 2) {
-        continue;
-      }
-
-      const name = pieces[0];
-      const reading = pieces[1];
-      const match = reading.match(/(-?\d+(?:\.\d+)?)\s*degrees\s*C/i);
-      if (!match) {
-        continue;
-      }
-
-      sensors.push({
-        name,
-        tempC: Number(match[1])
-      });
-    }
+    this.lastSensorReadMeta = {
+      lineCount: lines.length,
+      parsedCount: sensors.length,
+      sampleLine: lines[0] || null
+    };
 
     return sensors;
   }
