@@ -1,0 +1,16 @@
+{
+  "name": "ipmi-fan-controller",
+  "version": "1.0.0",
+  "description": "Node.js fan control daemon using ipmitool",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  }
+}
