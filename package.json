@@ -1,5 +1,5 @@
 {
-  "name": "ipmi-fan-controller",
+  "name": "ipmi-temperature-monitor",
   "version": "1.0.0",
   "description": "Node.js fan control daemon using ipmitool",
   "main": "src/index.js",

@@ -98,9 +98,10 @@ class FanController {
       const maxCpuTemp = this.maxOrNull(cpuTemps);
       const maxSystemTemp = this.maxOrNull(systemTemps);
       const referenceTemp = this.maxOrNull([maxCpuTemp, maxSystemTemp].filter((v) => v !== null));
+      const fanStatus = this.mode === 'auto' ? 'auto' : `${this.lastAppliedSpeed ?? 'n/a'}%`;
 
       this.logger.info(
-        `Temps | max CPU: ${maxCpuTemp ?? 'n/a'}°C | max System: ${maxSystemTemp ?? 'n/a'}°C | mode: ${this.mode}`
+        `Temps | max CPU: ${maxCpuTemp ?? 'n/a'}°C | max System: ${maxSystemTemp ?? 'n/a'}°C | fan: ${fanStatus} | mode: ${this.mode}`
       );
 
       if (maxCpuTemp !== null && maxCpuTemp >= this.config.maxCpuTempC) {

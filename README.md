@@ -1,4 +1,4 @@
-# IPMI Fan Controller
+# IPMI Temperature Monitor
 
 Node.js daemon that uses `ipmitool` to control server fan speed based on CPU/system temperatures.
 
@@ -15,6 +15,10 @@ Node.js daemon that uses `ipmitool` to control server fan speed based on CPU/sys
 - Node.js 18+
 - `ipmitool` installed and available in `PATH`
 - Local IPMI device access on the server where this app runs
+
+## Tested Hardware
+
+- Dell PowerEdge R620
 
 ## Setup
 
@@ -82,6 +86,16 @@ IPMI_SET_AUTO_COMMAND=raw 0x30 0x30 0x01 0x01
 IPMI_SET_FAN_SPEED_TEMPLATE=raw 0x30 0x30 0x02 0xff {{HEX_SPEED}}
 IPMI_SENSOR_COMMAND=sdr type temperature
 ```
+
+## Roadmap (Future Implementations)
+
+- Separate how CPU and system temperatures affect fan speeds:
+   - Add independent preset curves (for example, `CPU_FAN_PRESETS` and `SYSTEM_FAN_PRESETS`).
+   - Keep CPU safety fallback thresholds while allowing system-specific ramp behavior.
+- Add webhook/API controls for external automations:
+   - Enable external systems to force **auto** or **manual** mode.
+   - Optionally expose temporary fan-speed overrides for exceptional conditions not visible to IPMI sensors.
+   - Add a status endpoint to report current mode, temperatures, and override state.
 
 ## Safety note
 
