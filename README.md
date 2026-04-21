@@ -42,6 +42,20 @@ Node.js daemon that uses `ipmitool` to control server fan speed based on CPU/sys
 npm start
 ```
 
+### Run from anywhere (global command)
+
+From the project directory, install the command globally:
+
+```bash
+npm install -g .
+```
+
+Then start from any path on the server with:
+
+```bash
+itm
+```
+
 ## Configuration (`.env`)
 
 - `IPMI_INTERFACE` default `open` (do not use `lan`/`lanplus` in local-only mode)

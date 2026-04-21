@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Node.js fan control daemon using ipmitool",
   "main": "src/index.js",
+  "bin": {
+    "itm": "bin/itm-fan.js"
+  },
   "type": "commonjs",
   "scripts": {
     "start": "node src/index.js"
