@@ -103,6 +103,9 @@ IPMI_SENSOR_COMMAND=sdr type temperature
 
 ## Roadmap (Future Implementations)
 
+- Run as a persistent background service:
+   - Add a `systemd` unit and setup instructions so monitoring continues after SSH logout and on reboot.
+   - Include basic service operations (`start`, `stop`, `restart`, `status`, logs).
 - Separate how CPU and system temperatures affect fan speeds:
    - Add independent preset curves (for example, `CPU_FAN_PRESETS` and `SYSTEM_FAN_PRESETS`).
    - Keep CPU safety fallback thresholds while allowing system-specific ramp behavior.
