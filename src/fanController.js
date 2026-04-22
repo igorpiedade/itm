@@ -23,6 +23,12 @@ class FanController {
       .map((sensor) => sensor.tempC);
   }
 
+  getInletTemps(sensors) {
+    return sensors
+      .filter((sensor) => /inlet/i.test(sensor.name))
+      .map((sensor) => sensor.tempC);
+  }
+
   maxOrNull(values) {
     if (!values.length) {
       return null;
@@ -95,14 +101,11 @@ class FanController {
       const sensors = await this.ipmiClient.readTemperatureSensors();
       const cpuTemps = this.getCpuTemps(sensors);
       const systemTemps = this.getSystemTemps(sensors);
+      const inletTemps = this.getInletTemps(sensors);
       const maxCpuTemp = this.maxOrNull(cpuTemps);
       const maxSystemTemp = this.maxOrNull(systemTemps);
+      const maxInletTemp = this.maxOrNull(inletTemps);
       const referenceTemp = this.maxOrNull([maxCpuTemp, maxSystemTemp].filter((v) => v !== null));
-      const fanStatus = this.mode === 'auto' ? 'auto' : `${this.lastAppliedSpeed ?? 'n/a'}%`;
-
-      this.logger.info(
-        `Temps | max CPU: ${maxCpuTemp ?? 'n/a'}°C | max System: ${maxSystemTemp ?? 'n/a'}°C | fan: ${fanStatus} | mode: ${this.mode}`
-      );
 
       if (maxCpuTemp !== null && maxCpuTemp >= this.config.maxCpuTempC) {
         if (this.mode !== 'auto') {
@@ -142,7 +145,13 @@ class FanController {
 
       const targetSpeed = this.getPresetSpeedForTemp(referenceTemp);
       if (targetSpeed !== this.lastAppliedSpeed) {
-        this.logger.info(`Applying fan speed ${targetSpeed}% for reference temp ${referenceTemp}°C.`);
+        const now = new Date();
+        const date = now.toLocaleDateString();
+        const time = now.toLocaleTimeString();
+
+        this.logger.info(
+          `Date: ${date} | Time: ${time} | max CPU: ${maxCpuTemp ?? 'n/a'}°C | max System: ${maxSystemTemp ?? 'n/a'}°C | inlet: ${maxInletTemp ?? 'n/a'}°C | fan speed: ${targetSpeed}% | mode: ${this.mode}`
+        );
         await this.ipmiClient.setFanSpeedPercent(targetSpeed);
         this.lastAppliedSpeed = targetSpeed;
       }

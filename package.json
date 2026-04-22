@@ -1,15 +1,34 @@
 {
-  "name": "ipmi-temperature-monitor",
+  "name": "itm",
   "version": "1.0.0",
   "description": "Node.js fan control daemon using ipmitool",
   "main": "src/index.js",
   "bin": {
-    "itm": "bin/itm-fan.js"
+    "itm": "bin/itm-fan.js",
+    "itm-service-install": "bin/itm-service-install.js",
+    "itm-service-uninstall": "bin/itm-service-uninstall.js"
   },
+  "files": [
+    "bin",
+    "src",
+    "deploy",
+    ".env.example",
+    "README.md"
+  ],
   "type": "commonjs",
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "service:install": "node bin/itm-service-install.js",
+    "service:uninstall": "node bin/itm-service-uninstall.js"
   },
+  "keywords": [
+    "ipmi",
+    "fan",
+    "systemd",
+    "server",
+    "temperature"
+  ],
+  "preferGlobal": true,
   "engines": {
     "node": ">=18"
   },
