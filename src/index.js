@@ -7,6 +7,7 @@ require('dotenv').config({
 const { loadConfig } = require('./config');
 const { IpmiClient } = require('./ipmi');
 const { FanController } = require('./fanController');
+const { ApiServer } = require('./apiServer');
 
 const logger = {
   info: (message) => console.log(`[INFO] ${new Date().toISOString()} ${message}`),
@@ -18,10 +19,12 @@ const run = async () => {
   const config = loadConfig();
   const ipmiClient = new IpmiClient(config.ipmi);
   const fanController = new FanController({ ipmiClient, config, logger });
+  const apiServer = new ApiServer({ config: config.api, fanController, logger });
 
   const shutdown = async (signal) => {
     logger.info(`Received ${signal}; shutting down.`);
     try {
+      await apiServer.stop();
       await fanController.stop();
       process.exit(0);
     } catch (error) {
@@ -44,6 +47,7 @@ const run = async () => {
     });
   });
 
+  await apiServer.start();
   await fanController.start();
 };
 

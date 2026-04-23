@@ -90,13 +90,17 @@ sudo itm-service-uninstall --service-name itm --install-dir /srv/itm --remove-ap
 ## Configuration (`.env`)
 
 - `IPMI_INTERFACE` default `open` (do not use `lan`/`lanplus` in local-only mode)
-- `POLL_INTERVAL_MS` default `5000`
+- `POLL_INTERVAL_MS` default `30000`
 - `MAX_CPU_TEMP_C` default `85`
 - `RECOVERY_CPU_TEMP_C` default `60`
 - `CPU_SENSOR_REGEX` default `(^temp$|cpu)`
 - `SYSTEM_SENSOR_REGEX` default `(system|sys|inlet|ambient|exhaust)`
 - `FAN_PRESETS` default `0:10,51:15,60:25,70:40,75:60,80:80,85:100`
 - `RESTORE_AUTO_ON_EXIT` default `true`
+- `API_ENABLED` default `false`
+- `API_HOST` default `127.0.0.1`
+- `API_PORT` default `7001`
+- `API_AUTH_TOKEN` required when `API_ENABLED=true`
 
 For platforms where CPU sensors are exposed as plain `Temp`, keep the default `CPU_SENSOR_REGEX`.
 
@@ -130,6 +134,47 @@ IPMI_SET_MANUAL_COMMAND=raw 0x30 0x30 0x01 0x00
 IPMI_SET_AUTO_COMMAND=raw 0x30 0x30 0x01 0x01
 IPMI_SET_FAN_SPEED_TEMPLATE=raw 0x30 0x30 0x02 0xff {{HEX_SPEED}}
 IPMI_SENSOR_COMMAND=sdr type temperature
+```
+
+## External Control API
+
+Enable API in `.env`:
+
+```env
+API_ENABLED=true
+API_HOST=127.0.0.1
+API_PORT=7001
+API_AUTH_TOKEN=super-secret-token
+```
+
+Authentication uses bearer token in `Authorization` header.
+
+Get current status:
+
+```bash
+curl -s \
+	-H "Authorization: Bearer super-secret-token" \
+	http://127.0.0.1:7001/api/v1/status
+```
+
+Switch to auto mode:
+
+```bash
+curl -s -X POST \
+	-H "Authorization: Bearer super-secret-token" \
+	-H "Content-Type: application/json" \
+	-d '{"mode":"auto"}' \
+	http://127.0.0.1:7001/api/v1/mode
+```
+
+Switch to manual mode:
+
+```bash
+curl -s -X POST \
+	-H "Authorization: Bearer super-secret-token" \
+	-H "Content-Type: application/json" \
+	-d '{"mode":"manual"}' \
+	http://127.0.0.1:7001/api/v1/mode
 ```
 
 ## Roadmap (Future Implementations)

@@ -7,8 +7,45 @@ class FanController {
     this.isRunning = false;
     this.intervalHandle = null;
     this.mode = 'manual';
+    this.forceAutoMode = false;
     this.lastAppliedSpeed = null;
     this.isCycleInProgress = false;
+  }
+
+  getStatus() {
+    return {
+      isRunning: this.isRunning,
+      mode: this.mode,
+      forceAutoMode: this.forceAutoMode,
+      lastAppliedSpeed: this.lastAppliedSpeed
+    };
+  }
+
+  async setControlMode(mode) {
+    const normalizedMode = String(mode || '').trim().toLowerCase();
+
+    if (!['auto', 'manual'].includes(normalizedMode)) {
+      throw new Error(`Unsupported mode: ${mode}`);
+    }
+
+    if (normalizedMode === 'auto') {
+      this.forceAutoMode = true;
+      if (this.mode !== 'auto') {
+        await this.ipmiClient.setAutoMode();
+        this.mode = 'auto';
+        this.lastAppliedSpeed = null;
+      }
+      this.logger.info('External control set mode to AUTO.');
+      return this.getStatus();
+    }
+
+    this.forceAutoMode = false;
+    if (this.mode !== 'manual') {
+      await this.ipmiClient.setManualMode();
+      this.mode = 'manual';
+    }
+    this.logger.info('External control set mode to MANUAL.');
+    return this.getStatus();
   }
 
   getCpuTemps(sensors) {
@@ -99,6 +136,16 @@ class FanController {
 
     try {
       const sensors = await this.ipmiClient.readTemperatureSensors();
+
+      if (this.forceAutoMode) {
+        if (this.mode !== 'auto') {
+          await this.ipmiClient.setAutoMode();
+          this.mode = 'auto';
+          this.lastAppliedSpeed = null;
+        }
+        return;
+      }
+
       const cpuTemps = this.getCpuTemps(sensors);
       const systemTemps = this.getSystemTemps(sensors);
       const inletTemps = this.getInletTemps(sensors);

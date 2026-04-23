@@ -99,7 +99,22 @@ const toRegExp = (value, fallbackPattern, keyName) => {
   }
 };
 
+const toText = (value, fallback) => {
+  if (value === undefined || value === null || value === '') {
+    return fallback;
+  }
+
+  return String(value).trim();
+};
+
 const loadConfig = () => {
+  const apiEnabled = toBoolean(process.env.API_ENABLED, false);
+  const apiAuthToken = toText(process.env.API_AUTH_TOKEN, '');
+
+  if (apiEnabled && !apiAuthToken) {
+    throw new Error('API is enabled but API_AUTH_TOKEN is not set.');
+  }
+
   return {
     ipmi: {
       interface: normalizeLocalInterface(process.env.IPMI_INTERFACE),
@@ -109,7 +124,7 @@ const loadConfig = () => {
         splitCommand(process.env.IPMI_SET_FAN_SPEED_TEMPLATE) || ['raw', '0x30', '0x30', '0x02', '0xff', '{{HEX_SPEED}}'],
       sensorCommand: splitCommand(process.env.IPMI_SENSOR_COMMAND) || ['sdr', 'type', 'temperature']
     },
-    pollIntervalMs: toNumber(process.env.POLL_INTERVAL_MS, 5000),
+    pollIntervalMs: toNumber(process.env.POLL_INTERVAL_MS, 30000),
     maxCpuTempC: toNumber(process.env.MAX_CPU_TEMP_C, 85),
     recoveryCpuTempC: toNumber(process.env.RECOVERY_CPU_TEMP_C, 60),
     fanPresets: parsePresets(process.env.FAN_PRESETS),
@@ -119,7 +134,13 @@ const loadConfig = () => {
       process.env.SYSTEM_SENSOR_REGEX,
       '(system|sys|inlet|ambient|exhaust)',
       'SYSTEM_SENSOR_REGEX'
-    )
+    ),
+    api: {
+      enabled: apiEnabled,
+      host: toText(process.env.API_HOST, '127.0.0.1'),
+      port: toNumber(process.env.API_PORT, 7001),
+      authToken: apiAuthToken
+    }
   };
 };
 
